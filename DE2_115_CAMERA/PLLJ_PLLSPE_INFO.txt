@@ -1,0 +1,10 @@
+PLL_Name	image_wrapper:my_qsys|image_wrapper_altpll_0:altpll_0|image_wrapper_altpll_0_altpll_m342:sd1|pll7
+PLLJITTER	30
+PLLSPEmax	84
+PLLSPEmin	-53
+
+PLL_Name	sdram_pll:u6|sdram_pll_altpll:sdram_pll_altpll_component|pll1
+PLLJITTER	35
+PLLSPEmax	84
+PLLSPEmin	-53
+

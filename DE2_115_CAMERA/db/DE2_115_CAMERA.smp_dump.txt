@@ -1,0 +1,23 @@
+
+State Machine - |DE2_115_CAMERA|image_wrapper:my_qsys|ImageWrapper:image_wrapper_0|state_r
+Name state_r.IDLE state_r.GET_PREDICT state_r.SEND_IMAGE 
+state_r.IDLE 0 0 0 
+state_r.SEND_IMAGE 1 0 1 
+state_r.GET_PREDICT 1 1 0 
+
+State Machine - |DE2_115_CAMERA|sram_controller:sram_controller1|state_r
+Name state_r.TEST2 state_r.TEST state_r.OUTPUT_IMAGE state_r.STORE_STAGE2 state_r.WAIT_SIGNAL2 state_r.STORE_STAGE1 state_r.WAIT_SIGNAL1 state_r.IDLE 
+state_r.IDLE 0 0 0 0 0 0 0 0 
+state_r.WAIT_SIGNAL1 0 0 0 0 0 0 1 1 
+state_r.STORE_STAGE1 0 0 0 0 0 1 0 1 
+state_r.WAIT_SIGNAL2 0 0 0 0 1 0 0 1 
+state_r.STORE_STAGE2 0 0 0 1 0 0 0 1 
+state_r.OUTPUT_IMAGE 0 0 1 0 0 0 0 1 
+state_r.TEST 0 1 0 0 0 0 0 1 
+state_r.TEST2 1 0 0 0 0 0 0 1 
+
+State Machine - |DE2_115_CAMERA|I2C_CCD_Config:u8|mSetup_ST
+Name mSetup_ST.0000 mSetup_ST.0010 mSetup_ST.0001 
+mSetup_ST.0000 0 0 0 
+mSetup_ST.0001 1 0 1 
+mSetup_ST.0010 1 1 0 
