@@ -54,6 +54,7 @@ module	VGA_Controller(	//	Host Side
 						oVGA_SYNC,
 						oVGA_BLANK,
 						//	Control Signal
+						clk_50m,
 						iCLK,
 						iRST_N,
 						iZOOM_MODE_SW,
@@ -61,6 +62,12 @@ module	VGA_Controller(	//	Host Side
 						o_horizon,
 						o_vertical,
 						o_valid,
+						i_fore,
+						i_fore_valid,
+						i_filter,
+						// test
+						i_test_cnt,
+						o_test
 							);
 `include "VGA_Param.h"
 
@@ -115,6 +122,12 @@ output	reg			oVGA_BLANK;
 output		[12:0]	o_horizon;
 output		[12:0]	o_vertical;
 output				o_valid;
+input       [7:0]   i_fore;
+input				i_fore_valid;
+input				i_filter;
+// test
+input			[4:0] i_test_cnt;
+output		[7:0]	o_test;
 
 wire		[9:0]	mVGA_R;
 wire		[9:0]	mVGA_G;
@@ -125,6 +138,7 @@ wire				mVGA_SYNC;
 wire				mVGA_BLANK;
 
 //	Control Signal
+input				clk_50m;
 input				iCLK;
 input				iRST_N;
 input 				iZOOM_MODE_SW;
@@ -135,6 +149,47 @@ reg		[12:0]		V_Cont;
 
 wire	[12:0]		v_mask;
 
+//	sram side
+integer i;
+reg		[15:0]		fores_r [0:59];
+reg		[15:0]		fores_w [0:59];
+reg					cnt_r, cnt_w;
+reg		[7:0]		cnt_fore_r, cnt_fore_w;
+reg		[7:0]		cnt_test_r, cnt_test_w;
+wire				fore1;
+wire				fore2;
+wire				fore3;
+wire				fore4;
+wire				fore5;
+wire				fore6;
+wire				fore7;
+wire				fore8;
+wire				fore9;
+wire				fore10;
+wire				fore11;
+wire				fore12;
+wire				fore13;
+wire				fore14;
+wire				fore15;
+wire				meet_fore;
+
+assign fore1 = (o_horizon >= fores_r[0] && o_horizon <= fores_r[2] && o_vertical >= fores_r[1] && o_vertical <= fores_r[3]);
+assign fore2 = (o_horizon >= fores_r[4] && o_horizon <= fores_r[6] && o_vertical >= fores_r[5] && o_vertical <= fores_r[7]);
+assign fore3 = (o_horizon >= fores_r[8] && o_horizon <= fores_r[10] && o_vertical >= fores_r[9] && o_vertical <= fores_r[11]);
+assign fore4 = (o_horizon >= fores_r[12] && o_horizon <= fores_r[14] && o_vertical >= fores_r[13] && o_vertical <= fores_r[15]);
+assign fore5 = (o_horizon >= fores_r[16] && o_horizon <= fores_r[18] && o_vertical >= fores_r[17] && o_vertical <= fores_r[19]);
+assign fore6 = (o_horizon >= fores_r[20] && o_horizon <= fores_r[22] && o_vertical >= fores_r[21] && o_vertical <= fores_r[23]);
+assign fore7 = (o_horizon >= fores_r[24] && o_horizon <= fores_r[26] && o_vertical >= fores_r[25] && o_vertical <= fores_r[27]);
+assign fore8 = (o_horizon >= fores_r[28] && o_horizon <= fores_r[30] && o_vertical >= fores_r[29] && o_vertical <= fores_r[31]);
+assign fore9 = (o_horizon >= fores_r[32] && o_horizon <= fores_r[34] && o_vertical >= fores_r[33] && o_vertical <= fores_r[35]);
+assign fore10 = (o_horizon >= fores_r[36] && o_horizon <= fores_r[38] && o_vertical >= fores_r[37] && o_vertical <= fores_r[39]);
+assign fore11 = (o_horizon >= fores_r[40] && o_horizon <= fores_r[42] && o_vertical >= fores_r[41] && o_vertical <= fores_r[43]);
+assign fore12 = (o_horizon >= fores_r[44] && o_horizon <= fores_r[46] && o_vertical >= fores_r[45] && o_vertical <= fores_r[47]);
+assign fore13 = (o_horizon >= fores_r[48] && o_horizon <= fores_r[50] && o_vertical >= fores_r[49] && o_vertical <= fores_r[51]);
+assign fore14 = (o_horizon >= fores_r[52] && o_horizon <= fores_r[54] && o_vertical >= fores_r[53] && o_vertical <= fores_r[55]);
+assign fore15 = (o_horizon >= fores_r[56] && o_horizon <= fores_r[58] && o_vertical >= fores_r[57] && o_vertical <= fores_r[59]);
+assign meet_fore = (fore1 || fore2 || fore3 || fore4 || fore5 || fore6 || fore7 || fore8 || fore9 || fore10 || fore11 || fore12 || fore13 || fore14 || fore15);
+
 assign v_mask = 13'd0 ;//iZOOM_MODE_SW ? 13'd0 : 13'd26;
 
 ////////////////////////////////////////////////////////
@@ -144,28 +199,44 @@ assign	mVGA_SYNC	=	1'b0;
 
 assign	mVGA_R	=	(	H_Cont>=X_START 	&& H_Cont<X_START+H_SYNC_ACT &&
 						V_Cont>=Y_START+v_mask 	&& V_Cont<Y_START+V_SYNC_ACT )
-						?	iRed	:	0;
+						?	(i_filter) ? (meet_fore) ? 1023 : iRed : iRed	:	0;
 assign	mVGA_G	=	(	H_Cont>=X_START 	&& H_Cont<X_START+H_SYNC_ACT &&
 						V_Cont>=Y_START+v_mask 	&& V_Cont<Y_START+V_SYNC_ACT )
-						?	iGreen	:	0;
+						?	(i_filter) ? (meet_fore) ? 1023 : iGreen : iGreen	:	0;
 assign	mVGA_B	=	(	H_Cont>=X_START 	&& H_Cont<X_START+H_SYNC_ACT &&
 						V_Cont>=Y_START+v_mask 	&& V_Cont<Y_START+V_SYNC_ACT )
-						?	iBlue	:	0;
-
-// assign	mVGA_R	=	(	H_Cont>=X_START 	&& H_Cont<X_START+H_SYNC_ACT &&
-// 						V_Cont>=Y_START+v_mask 	&& V_Cont<Y_START+V_SYNC_ACT )
-// 						?	200*4	:	0;
-// assign	mVGA_G	=	(	H_Cont>=X_START 	&& H_Cont<X_START+H_SYNC_ACT &&
-// 						V_Cont>=Y_START+v_mask 	&& V_Cont<Y_START+V_SYNC_ACT )
-// 						?	100*4	:	0;
-// assign	mVGA_B	=	(	H_Cont>=X_START 	&& H_Cont<X_START+H_SYNC_ACT &&
-// 						V_Cont>=Y_START+v_mask 	&& V_Cont<Y_START+V_SYNC_ACT )
-// 						?	50*4    :   0;
+						?	(i_filter) ? (meet_fore) ? 1023 : iBlue : iBlue	:	0;
 
 assign o_valid = (H_Cont>=X_START+1 	&& H_Cont<X_START+H_SYNC_ACT+1 &&
 				V_Cont>=Y_START+v_mask 	&& V_Cont<Y_START+V_SYNC_ACT);
 assign o_horizon = H_Cont - X_START-1;
 assign o_vertical = V_Cont - (Y_START+v_mask);
+
+assign o_test = fores_r[i_test_cnt][7:0];
+// assign o_test = cnt_test_r;
+
+always @(*) begin
+	cnt_w = (i_fore_valid) ? ~cnt_r : cnt_r;
+end
+
+always @(*) begin
+	cnt_fore_w = (i_fore_valid) ? (cnt_r) ? (cnt_fore_r == 59) ? 0 : cnt_fore_r + 1 : cnt_fore_r : cnt_fore_r;
+end
+
+always @(*) begin
+	cnt_test_w = (i_fore_valid) ? cnt_test_r + 1 : cnt_test_r;
+end
+
+//save fores
+always @(*) begin
+    for (i=0;i<=59;i=i+1) begin
+        fores_w[i] = fores_r[i];
+    end
+    if (i_fore_valid) begin
+        // fores_w[cnt_fore_r] = i_fore;
+		fores_w[cnt_fore_r] = (cnt_r) ? {fores_r[cnt_fore_r][15:8], i_fore} : {i_fore, fores_r[cnt_fore_r][7:0]};
+    end
+end
 
 always@(posedge iCLK or negedge iRST_N)
 	begin
@@ -238,12 +309,23 @@ begin
 	begin
 		V_Cont		<=	0;
 		mVGA_V_SYNC	<=	0;
+		for (i=0;i<=59;i=i+1) begin
+            fores_r[i] <= 16'hffff;
+        end
+		cnt_r <= 0;
+		cnt_fore_r <= 0;
+		cnt_test_r <= 0;
 	end
 	else
 	begin
+		for (i=0;i<=59;i=i+1) begin
+			fores_r[i] <= fores_w[i];
+		end
+		cnt_r <= cnt_w;
+		cnt_fore_r <= cnt_fore_w;
+		cnt_test_r <= cnt_test_w;
 		//	When H_Sync Re-start
-		if(H_Cont==0)
-		begin
+		if(H_Cont==0) begin
 			//	V_Sync Counter
 			if( V_Cont < V_SYNC_TOTAL )
 			V_Cont	<=	V_Cont+1;
@@ -257,5 +339,24 @@ begin
 		end
 	end
 end
+
+// always@(posedge clk_50m or negedge iRST_N) begin
+// 	if (!iRST_N) begin
+// 		for (i=0;i<=59;i=i+1) begin
+//             fores_r[i] <= 16'hffff;
+//         end
+// 		cnt_r <= 0;
+// 		cnt_fore_r <= 0;
+// 		cnt_test_r <= 0;
+// 	end
+// 	else begin
+// 		for (i=0;i<=59;i=i+1) begin
+// 			fores_r[i] <= fores_w[i];
+// 		end
+// 		cnt_r <= cnt_w;
+// 		cnt_fore_r <= cnt_fore_w;
+// 		cnt_test_r <= cnt_test_w;
+// 	end
+// end
 
 endmodule

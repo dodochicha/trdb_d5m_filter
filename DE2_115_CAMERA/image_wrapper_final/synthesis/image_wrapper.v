@@ -12,7 +12,9 @@ module image_wrapper (
 		input i_start_send,
 		output o_ready,
 		output o_state,
-		input i_writedata_valid
+		output [7:0] o_readdata,
+		output o_readdata_valid,
+		output [7:0] o_test
 	);
 
 	wire         altpll_0_c0_clk;                             // altpll_0:c0 -> [Image_Wrapper_0:avm_clk, mm_interconnect_0:altpll_0_c0_clk, rst_controller:clk, uart_0:clk]
@@ -45,7 +47,9 @@ module image_wrapper (
 		.i_start_send(i_start_send),
 		.o_ready(o_ready),
 		.o_state(o_state),
-		.i_writedata_valid(i_writedata_valid)
+		.o_readdata(o_readdata),
+		.o_readdata_valid(o_readdata_valid),
+		.o_test(o_test)
 	);
 
 	image_wrapper_altpll_0 altpll_0 (

@@ -476,6 +476,13 @@ wire [7:0] sram_data;
 wire [3:0] wrapper_state;
 wire [3:0] test2;
 wire writedata_valid;
+wire [23:0] newRGB;
+wire [7:0] readdata;
+wire readdata_valid;
+wire [7:0] fore;
+wire fore_valid;
+wire [7:0] vga_test;
+wire [7:0] wrapper_test;
 
 //power on start
 wire             auto_start;
@@ -674,6 +681,7 @@ VGA_Controller		u1	(	//	Host Side
 							.oVGA_SYNC(VGA_SYNC_N),
 							.oVGA_BLANK(VGA_BLANK_N),
 							//	Control Signal
+							.clk_50m(CLOCK_50),
 							.iCLK(VGA_CTRL_CLK),
 							.iRST_N(DLY_RST_2),
 							.iZOOM_MODE_SW(SW[16]),
@@ -681,6 +689,12 @@ VGA_Controller		u1	(	//	Host Side
 							.o_horizon(vga_horizon),
 							.o_vertical(vga_vertical),
 							.o_valid(vga_valid),
+							.i_fore(readdata),
+							.i_fore_valid(readdata_valid),
+							.i_filter(SW[2]),
+							//test
+							.i_test_cnt(SW[7:3]),
+							.o_test(vga_test)
 						);
 // sram controller
 sram_controller sram_controller1 (
@@ -707,7 +721,10 @@ sram_controller sram_controller1 (
 	.o_state(sram_controller_state),
 	.o_sram_data(sram_data),
 	.o_test2(test2),
-	.o_writedata_valid(writedata_valid)
+	.i_readdata(readdata),
+    .i_readdata_valid(readdata_valid),
+	.o_fore(fore),
+	.o_fore_valid(fore_valid)
 );
 
 image_wrapper my_qsys(
@@ -720,7 +737,9 @@ image_wrapper my_qsys(
 	.i_writedata(wrapper_writedata),
 	.o_ready(wrapper_ready),
 	.o_state(wrapper_state),
-	.i_writedata_valid(writedata_valid)
+	.o_readdata(readdata),
+   	.o_readdata_valid(readdata_valid),
+	.o_test(wrapper_test)
 );
 
 SevenHexDecoder seven_dec0(
@@ -730,13 +749,13 @@ SevenHexDecoder seven_dec0(
 );
 
 SevenHexDecoder seven_dec1(
-	.i_hex(sram_data[3:0]),
+	.i_hex(vga_test[3:0]),
 	.o_seven_ten(HEX3),
 	.o_seven_one(HEX2)
 );
 
 SevenHexDecoder seven_dec2(
-	.i_hex(sram_data[7:4]),
+	.i_hex(vga_test[7:4]),
 	.o_seven_ten(HEX5),
 	.o_seven_one(HEX4)
 );

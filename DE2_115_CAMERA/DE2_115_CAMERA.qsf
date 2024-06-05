@@ -1038,3 +1038,4 @@ set_global_assignment -name VERILOG_FILE v/Line_Buffer1.v
 set_global_assignment -name QIP_FILE v/Line_Buffer1.qip
 set_global_assignment -name VERILOG_FILE DE2_115_CAMERA.v
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name QIP_FILE ram.qip

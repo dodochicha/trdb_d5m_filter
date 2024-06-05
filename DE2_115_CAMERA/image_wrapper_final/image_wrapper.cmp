@@ -1,9 +1,14 @@
 	component image_wrapper is
 		port (
-			clk_clk                        : in  std_logic := 'X'; -- clk
-			reset_reset_n                  : in  std_logic := 'X'; -- reset_n
-			uart_0_external_connection_rxd : in  std_logic := 'X'; -- rxd
-			uart_0_external_connection_txd : out std_logic         -- txd
+			clk_clk                                             : in  std_logic                    := 'X';             -- clk
+			reset_reset_n                                       : in  std_logic                    := 'X';             -- reset_n
+			uart_0_external_connection_rxd                      : in  std_logic                    := 'X';             -- rxd
+			uart_0_external_connection_txd                      : out std_logic;                                       -- txd
+			image_wrapper_0_avalon_slave_0_beginbursttransfer   : in  std_logic                    := 'X';             -- beginbursttransfer
+			image_wrapper_0_avalon_slave_0_writeresponsevalid_n : out std_logic;                                       -- writeresponsevalid_n
+			image_wrapper_0_avalon_slave_0_readdata             : out std_logic_vector(7 downto 0);                    -- readdata
+			image_wrapper_0_i_writedata                         : in  std_logic_vector(7 downto 0) := (others => 'X'); -- writedata
+			image_wrapper_0_o_readdata                          : out std_logic                                        -- readdata
 		);
 	end component image_wrapper;
 

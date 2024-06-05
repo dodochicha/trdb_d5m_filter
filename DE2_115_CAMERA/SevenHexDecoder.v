@@ -33,12 +33,12 @@ always @(*) begin
 		4'h7: begin o_seven_ten = D0; o_seven_one = D7; end
 		4'h8: begin o_seven_ten = D0; o_seven_one = D8; end
 		4'h9: begin o_seven_ten = D0; o_seven_one = D9; end
-		4'ha: begin o_seven_ten = D2; o_seven_one = D0; end
-		4'hb: begin o_seven_ten = D2; o_seven_one = D1; end
-		4'hc: begin o_seven_ten = D2; o_seven_one = D2; end
-		4'hd: begin o_seven_ten = D2; o_seven_one = D3; end
-		4'he: begin o_seven_ten = D2; o_seven_one = D4; end
-		4'hf: begin o_seven_ten = D2; o_seven_one = D5; end
+		4'ha: begin o_seven_ten = D1; o_seven_one = D0; end
+		4'hb: begin o_seven_ten = D1; o_seven_one = D1; end
+		4'hc: begin o_seven_ten = D1; o_seven_one = D2; end
+		4'hd: begin o_seven_ten = D1; o_seven_one = D3; end
+		4'he: begin o_seven_ten = D1; o_seven_one = D4; end
+		4'hf: begin o_seven_ten = D1; o_seven_one = D5; end
 	endcase
 end
 

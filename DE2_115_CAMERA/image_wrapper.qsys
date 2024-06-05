@@ -6,7 +6,7 @@
    version="1.0"
    description=""
    tags=""
-   categories="" />
+   categories="System" />
  <parameter name="bonusData"><![CDATA[bonusData 
 {
    element $${FILENAME}
@@ -39,6 +39,14 @@
       {
          value = "0";
          type = "int";
+      }
+   }
+   element image_wrapper
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Cyclone IV E";
+         type = "String";
       }
    }
    element uart_0
@@ -95,7 +103,7 @@
  <parameter name="hideFromIPCatalog" value="false" />
  <parameter name="lockedInterfaceDefinition" value="" />
  <parameter name="maxAdditionalLatency" value="1" />
- <parameter name="projectName" value="" />
+ <parameter name="projectName" value="DE2_115_CAMERA.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="0" />
  <parameter name="testBenchDutName" value="" />
@@ -103,6 +111,21 @@
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk" internal="clk_0.clk_in" type="clock" dir="end" />
+ <interface
+   name="image_wrapper_0_avalon_slave_0"
+   internal="Image_Wrapper_0.avalon_slave_0"
+   type="avalon"
+   dir="end" />
+ <interface
+   name="image_wrapper_0_i"
+   internal="Image_Wrapper_0.i"
+   type="avalon"
+   dir="end" />
+ <interface
+   name="image_wrapper_0_o"
+   internal="Image_Wrapper_0.o"
+   type="avalon"
+   dir="end" />
  <interface name="reset" internal="clk_0.clk_in_reset" type="reset" dir="end" />
  <interface
    name="uart_0_external_connection"
