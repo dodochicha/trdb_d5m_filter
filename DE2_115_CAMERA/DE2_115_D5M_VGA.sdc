@@ -10,8 +10,10 @@ create_clock -period 20.000ns [get_ports CLOCK_50]
 create_clock -period 20.000ns [get_ports CLOCK2_50]
 create_clock -period 20.000ns [get_ports CLOCK3_50]
 
-create_clock -period 1000.0ns [get_ports D5M_PIXLCLK]
-create_clock -period "0.1 MHz" -name clk_vga [get_ports VGA_CLK]
+# create_clock -period 80.0ns [get_ports D5M_PIXLCLK]
+create_clock -period 40.0 [get_ports D5M_PIXLCLK]
+# create_clock -period "12.5 MHz" -name clk_vga [get_ports VGA_CLK]
+# create_clock -period "0.05 MHz" -name clk_vga [get_ports VGA_CLK]
 
 # VGA : 800x600@60Hz
 # create_clock -period "40.0 MHz" -name clk_vga [get_ports VGA_CLK]

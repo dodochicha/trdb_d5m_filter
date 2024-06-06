@@ -156,6 +156,8 @@ reg		[15:0]		fores_w [0:59];
 reg					cnt_r, cnt_w;
 reg		[7:0]		cnt_fore_r, cnt_fore_w;
 reg		[7:0]		cnt_test_r, cnt_test_w;
+//	fore
+reg		[29:0]		fore_color_r, fore_color_w;
 wire				fore1;
 wire				fore2;
 wire				fore3;
@@ -199,13 +201,13 @@ assign	mVGA_SYNC	=	1'b0;
 
 assign	mVGA_R	=	(	H_Cont>=X_START 	&& H_Cont<X_START+H_SYNC_ACT &&
 						V_Cont>=Y_START+v_mask 	&& V_Cont<Y_START+V_SYNC_ACT )
-						?	(i_filter) ? (meet_fore) ? 1023 : iRed : iRed	:	0;
+						?	(i_filter) ? (meet_fore) ? fore_color_r[29:20] : iRed : iRed	:	0;
 assign	mVGA_G	=	(	H_Cont>=X_START 	&& H_Cont<X_START+H_SYNC_ACT &&
 						V_Cont>=Y_START+v_mask 	&& V_Cont<Y_START+V_SYNC_ACT )
-						?	(i_filter) ? (meet_fore) ? 1023 : iGreen : iGreen	:	0;
+						?	(i_filter) ? (meet_fore) ? fore_color_r[19:10] : iGreen : iGreen	:	0;
 assign	mVGA_B	=	(	H_Cont>=X_START 	&& H_Cont<X_START+H_SYNC_ACT &&
 						V_Cont>=Y_START+v_mask 	&& V_Cont<Y_START+V_SYNC_ACT )
-						?	(i_filter) ? (meet_fore) ? 1023 : iBlue : iBlue	:	0;
+						?	(i_filter) ? (meet_fore) ? fore_color_r[9:0] : iBlue : iBlue	:	0;
 
 assign o_valid = (H_Cont>=X_START+1 	&& H_Cont<X_START+H_SYNC_ACT+1 &&
 				V_Cont>=Y_START+v_mask 	&& V_Cont<Y_START+V_SYNC_ACT);
@@ -214,6 +216,20 @@ assign o_vertical = V_Cont - (Y_START+v_mask);
 
 assign o_test = fores_r[i_test_cnt][7:0];
 // assign o_test = cnt_test_r;
+
+always @(*) begin
+	if (o_horizon == fores_r[0]-1 && o_vertical >= fores_r[1] && o_vertical <= fores_r[3]|| o_horizon == fores_r[4]-1 && o_vertical >= fores_r[5] && o_vertical <= fores_r[7]||
+		o_horizon == fores_r[8]-1 && o_vertical >= fores_r[9] && o_vertical <= fores_r[11]|| o_horizon == fores_r[12]-1 && o_vertical >= fores_r[13] && o_vertical <= fores_r[15]||
+		o_horizon == fores_r[16]-1 && o_vertical >= fores_r[17] && o_vertical <= fores_r[19]|| o_horizon == fores_r[20]-1 && o_vertical >= fores_r[21] && o_vertical <= fores_r[23]|| 
+		o_horizon == fores_r[24]-1 && o_vertical >= fores_r[25] && o_vertical <= fores_r[27]|| o_horizon == fores_r[28]-1 && o_vertical >= fores_r[29] && o_vertical <= fores_r[31]|| 
+		o_horizon == fores_r[32]-1 && o_vertical >= fores_r[33] && o_vertical <= fores_r[35]|| o_horizon == fores_r[36]-1 && o_vertical >= fores_r[37] && o_vertical <= fores_r[39]|| 
+		o_horizon == fores_r[40]-1 && o_vertical >= fores_r[41] && o_vertical <= fores_r[43]|| o_horizon == fores_r[44]-1 && o_vertical >= fores_r[45] && o_vertical <= fores_r[47]|| 
+		o_horizon == fores_r[48]-1 && o_vertical >= fores_r[49] && o_vertical <= fores_r[51]|| o_horizon == fores_r[52]-1 && o_vertical >= fores_r[53] && o_vertical <= fores_r[55]|| 
+		o_horizon == fores_r[56]-1 && o_vertical >= fores_r[57] && o_vertical <= fores_r[59]) begin
+			fore_color_w = {iRed, iGreen, iBlue};
+		end
+	else fore_color_w = fore_color_r;
+end
 
 always @(*) begin
 	cnt_w = (i_fore_valid) ? ~cnt_r : cnt_r;
@@ -315,6 +331,7 @@ begin
 		cnt_r <= 0;
 		cnt_fore_r <= 0;
 		cnt_test_r <= 0;
+		fore_color_r <= 0;
 	end
 	else
 	begin
@@ -324,6 +341,7 @@ begin
 		cnt_r <= cnt_w;
 		cnt_fore_r <= cnt_fore_w;
 		cnt_test_r <= cnt_test_w;
+		fore_color_r <= fore_color_w;
 		//	When H_Sync Re-start
 		if(H_Cont==0) begin
 			//	V_Sync Counter
@@ -339,24 +357,5 @@ begin
 		end
 	end
 end
-
-// always@(posedge clk_50m or negedge iRST_N) begin
-// 	if (!iRST_N) begin
-// 		for (i=0;i<=59;i=i+1) begin
-//             fores_r[i] <= 16'hffff;
-//         end
-// 		cnt_r <= 0;
-// 		cnt_fore_r <= 0;
-// 		cnt_test_r <= 0;
-// 	end
-// 	else begin
-// 		for (i=0;i<=59;i=i+1) begin
-// 			fores_r[i] <= fores_w[i];
-// 		end
-// 		cnt_r <= cnt_w;
-// 		cnt_fore_r <= cnt_fore_w;
-// 		cnt_test_r <= cnt_test_w;
-// 	end
-// end
 
 endmodule

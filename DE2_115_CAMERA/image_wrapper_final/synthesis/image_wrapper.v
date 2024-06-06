@@ -8,13 +8,13 @@ module image_wrapper (
 		input  wire  reset_reset_n,                  //                      reset.reset_n
 		input  wire  uart_0_external_connection_rxd, // uart_0_external_connection.rxd
 		output wire  uart_0_external_connection_txd,  //                           .txd
-		input [7:0] i_writedata,
-		input i_start_send,
-		output o_ready,
-		output o_state,
-		output [7:0] o_readdata,
-		output o_readdata_valid,
-		output [7:0] o_test
+		input wire i_start_send,
+		input wire [7:0] i_writedata,
+		output wire o_ready,
+		output wire [3:0] o_state,
+		output wire [7:0] o_readdata,
+   	output wire o_readdata_valid
+		//output [7:0] o_test
 	);
 
 	wire         altpll_0_c0_clk;                             // altpll_0:c0 -> [Image_Wrapper_0:avm_clk, mm_interconnect_0:altpll_0_c0_clk, rst_controller:clk, uart_0:clk]
@@ -43,13 +43,15 @@ module image_wrapper (
 		.avm_waitrequest (image_wrapper_0_avalon_master_0_waitrequest), //                .waitrequest
 		.avm_clk         (altpll_0_c0_clk),                             //      clock_sink.clk
 		.avm_rst         (rst_controller_reset_out_reset),               //      reset_sink.reset
+		// sram controller side
 		.i_writedata(i_writedata),
 		.i_start_send(i_start_send),
 		.o_ready(o_ready),
-		.o_state(o_state),
 		.o_readdata(o_readdata),
 		.o_readdata_valid(o_readdata_valid),
-		.o_test(o_test)
+    //test
+		.o_state(o_state)
+		//.o_test(o_test)
 	);
 
 	image_wrapper_altpll_0 altpll_0 (

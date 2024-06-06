@@ -185,7 +185,7 @@ always@ (*) begin
     case (state_r)
         IDLE: state_w = (i_start_send) ? SEND_IMAGE : IDLE;
         SEND_IMAGE: state_w = (~avm_waitrequest && cnt_r == 1 && color_r == 2 && h_r == 639 && v_r == 479) ? GET_PREDICT : SEND_IMAGE;
-        GET_PREDICT: state_w = (~avm_waitrequest && box_r == 15 && point_r == 7 && cnt_r == 1) ? IDLE : GET_PREDICT;
+        GET_PREDICT: state_w = (~avm_waitrequest && box_r == 14 && point_r == 7 && cnt_r == 1) ? IDLE : GET_PREDICT;
         default: state_w = IDLE;
     endcase
 end
