@@ -11,7 +11,7 @@ module image_wrapper (
 		input wire i_start_send,
 		input wire [7:0] i_writedata,
 		output wire o_ready,
-		output wire [3:0] o_state,
+		//output wire [3:0] o_state,
 		output wire [7:0] o_readdata,
    	output wire o_readdata_valid
 		//output [7:0] o_test
@@ -50,7 +50,7 @@ module image_wrapper (
 		.o_readdata(o_readdata),
 		.o_readdata_valid(o_readdata_valid),
     //test
-		.o_state(o_state)
+		//.o_state(o_state),
 		//.o_test(o_test)
 	);
 

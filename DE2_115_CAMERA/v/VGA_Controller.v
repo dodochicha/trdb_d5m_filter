@@ -58,13 +58,15 @@ module	VGA_Controller(	//	Host Side
 						iCLK,
 						iRST_N,
 						iZOOM_MODE_SW,
+						i_filter,
+						i_to_white,
+						i_to_black,
 						// sram controller side
 						o_horizon,
 						o_vertical,
 						o_valid,
 						i_fore,
 						i_fore_valid,
-						i_filter,
 						// test
 						i_test_cnt,
 						o_test
@@ -124,9 +126,8 @@ output		[12:0]	o_vertical;
 output				o_valid;
 input       [7:0]   i_fore;
 input				i_fore_valid;
-input				i_filter;
 // test
-input			[4:0] i_test_cnt;
+input		[4:0] i_test_cnt;
 output		[7:0]	o_test;
 
 wire		[9:0]	mVGA_R;
@@ -142,6 +143,9 @@ input				clk_50m;
 input				iCLK;
 input				iRST_N;
 input 				iZOOM_MODE_SW;
+input				i_filter;
+input				i_to_white;
+input				i_to_black;
 
 //	Internal Registers and Wires
 reg		[12:0]		H_Cont;
@@ -174,6 +178,53 @@ wire				fore13;
 wire				fore14;
 wire				fore15;
 wire				meet_fore;
+wire	[29:0] 		modified_color;
+wire	[29:0] 		mixed_color;
+wire	[29:0] 		vga_color;
+wire	[8:0] 		mixed_red;
+wire	[8:0] 		mixed_green;
+wire	[8:0] 		mixed_blue;
+wire	[8:0]		red;
+wire	[8:0]		green;
+wire	[8:0]		blue;
+wire	[8:0]		modified_blue;	
+wire	[8:0]		modified_green;	
+wire	[8:0]		modified_red;	
+wire	[8:0]		vga_blue;	
+wire	[8:0]		vga_green;	
+wire	[8:0]		vga_red;	
+wire	[8:0]		ext_blue;	
+wire	[8:0]		ext_green;	
+wire	[8:0]		ext_red;	
+wire				is_skin;
+
+assign red = {1'b0, iRed[9:2]};
+assign green = {1'b0, iGreen[9:2]};
+assign blue = {1'b0, iBlue[9:2]};
+// assign color_v = (red > green) ? red : (green > blue) ? green : blue;
+assign mixed_red = (meet_fore) ? (fore_color_r[29:22] + red) >> 1 : red;
+assign mixed_green = (meet_fore) ? (fore_color_r[19:12] + green) >> 1 : green;
+assign mixed_blue = (meet_fore) ? (fore_color_r[9:2] + blue) >> 1 : blue;
+// if r>80 and g>30 and b>15 and abs(r-g)>15:
+assign is_skin = (mixed_red>80 && mixed_green>30 && mixed_green>15 && ($signed(mixed_red)-$signed(mixed_green)>15 || $signed(mixed_green)-$signed(mixed_red)>15));
+assign mixed_color = {mixed_red[7:0], 2'b00, mixed_green[7:0], 2'b00, mixed_blue[7:0], 2'b00};
+assign modified_color = (red < blue + 75) ? mixed_color : fore_color_r;
+assign modified_red = {1'b0, modified_color[29:22]};
+assign modified_green = {1'b0, modified_color[19:12]};
+assign modified_blue = {1'b0, modified_color[9:2]};
+assign vga_color = (meet_fore) ? modified_color : {iRed, iGreen, iBlue};
+assign ext_red = {1'b0, vga_color[29:22]};
+assign ext_green = {1'b0, vga_color[19:12]};
+assign ext_blue = {1'b0, vga_color[9:2]};
+assign vga_red = (is_skin) ? (i_to_white && !i_to_black) ? (ext_red+10>255) ? 255 : ext_red+10 : 
+					  (!i_to_white && i_to_black) ? (ext_red-10<0) ? 0 : ext_red-10 : ext_red : ext_red;
+assign vga_green = (is_skin) ? (i_to_white && !i_to_black) ? (ext_green+10>255) ? 255 : ext_green+10 : 
+					  (!i_to_white && i_to_black) ? (ext_green-10<0) ? 0 : ext_green-10 : ext_green : ext_green;
+assign vga_blue = (is_skin) ? (i_to_white && !i_to_black) ? (ext_blue+10>255) ? 255 : ext_blue+10 : 
+					  (!i_to_white && i_to_black) ? (ext_blue-10<0) ? 0 : ext_blue-10 : ext_blue : ext_blue;
+// assign vga_v = (vga_red > vga_green) ? vga_red : (vga_green > vga_blue) ? vga_green : vga_blue;
+// assign fore_v = (fore_color_r[29:22] > fore_color_r[19:12]) ? fore_color_r[29:22] : (fore_color_r[19:12] > fore_color_r[9:2]) ? fore_color_r[19:12] : fore_color_r[9:2];
+
 
 assign fore1 = (o_horizon >= fores_r[0] && o_horizon <= fores_r[2] && o_vertical >= fores_r[1] && o_vertical <= fores_r[3]);
 assign fore2 = (o_horizon >= fores_r[4] && o_horizon <= fores_r[6] && o_vertical >= fores_r[5] && o_vertical <= fores_r[7]);
@@ -201,13 +252,13 @@ assign	mVGA_SYNC	=	1'b0;
 
 assign	mVGA_R	=	(	H_Cont>=X_START 	&& H_Cont<X_START+H_SYNC_ACT &&
 						V_Cont>=Y_START+v_mask 	&& V_Cont<Y_START+V_SYNC_ACT )
-						?	(i_filter) ? (meet_fore) ? fore_color_r[29:20] : iRed : iRed	:	0;
+						?	(i_filter) ? {vga_red[7:0], 2'b00} : iRed	:	0;
 assign	mVGA_G	=	(	H_Cont>=X_START 	&& H_Cont<X_START+H_SYNC_ACT &&
 						V_Cont>=Y_START+v_mask 	&& V_Cont<Y_START+V_SYNC_ACT )
-						?	(i_filter) ? (meet_fore) ? fore_color_r[19:10] : iGreen : iGreen	:	0;
+						?	(i_filter) ? {vga_green[7:0], 2'b00} : iGreen	:	0;
 assign	mVGA_B	=	(	H_Cont>=X_START 	&& H_Cont<X_START+H_SYNC_ACT &&
 						V_Cont>=Y_START+v_mask 	&& V_Cont<Y_START+V_SYNC_ACT )
-						?	(i_filter) ? (meet_fore) ? fore_color_r[9:0] : iBlue : iBlue	:	0;
+						?	(i_filter) ? {vga_blue[7:0], 2'b00} : iBlue	:	0;
 
 assign o_valid = (H_Cont>=X_START+1 	&& H_Cont<X_START+H_SYNC_ACT+1 &&
 				V_Cont>=Y_START+v_mask 	&& V_Cont<Y_START+V_SYNC_ACT);

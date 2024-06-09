@@ -56,22 +56,37 @@ while True:
         print(int(fore[0]),int(fore[1]),int(fore[2]),int(fore[3]))
 
     fore_array = []
-    for i in range(15):
-        if i <= len(results[0].boxes.data)-1:
-            for fore in results[0].boxes.data:
-                for j in range(4):
-                    for k in range(2):
-                        if k == 0:
-                            x = int(fore[j]) // 256
-                            print(int(fore[j]), ' ', x)
-                            fore_array.append(x)
-                        else:
-                            y = int(fore[j]) % 256
-                            print(int(fore[j]), ' ', y)
-                            fore_array.append(y)
-        else:
-            for j in range(8):
-                fore_array.append(66)
+    k = 0
+    for fore in results[0].boxes.data:
+        x = int(fore[0]) // 256
+        print(int(fore[0]), ' ', x)
+        fore_array.append(x)
+        y = int(fore[0]) % 256
+        print(int(fore[0]), ' ', y)
+        fore_array.append(y)
+        x = int(fore[1]) // 256
+        print(int(fore[1]), ' ', x)
+        fore_array.append(x)
+        y = int(fore[1]) % 256
+        print(int(fore[1]), ' ', y)
+        fore_array.append(y)
+        x = int(fore[2]) // 256
+        print(int(fore[2]), ' ', x)
+        fore_array.append(x)
+        y = int(fore[2]) % 256
+        print(int(fore[2]), ' ', y)
+        fore_array.append(y)
+        x = int(fore[3]) // 256
+        print(int(fore[3]), ' ', x)
+        fore_array.append(x)
+        y = int(fore[3]) % 256
+        print(int(fore[3]), ' ', y)
+        fore_array.append(y)
+        k = k + 1
+    while k < 15:
+        for i in range(8):
+            fore_array.append(255)
+        k = k + 1
     print(len(fore_array))
     print(fore_array)
 

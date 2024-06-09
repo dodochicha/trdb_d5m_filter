@@ -12,10 +12,10 @@ module ImageWrapper (
     input         i_start_send,
     output        o_ready,
     output [7:0]  o_readdata,
-    output        o_readdata_valid,
+    output        o_readdata_valid
     //test
-    output [3:0] o_state,
-    output [7:0] o_test
+    // output [3:0] o_state,
+    // output [7:0] o_test
 );
 
 localparam RX_BASE     = 0*4;
@@ -36,28 +36,23 @@ reg avm_read_r, avm_read_w, avm_write_r, avm_write_w;
 reg [7:0] writedata_r, writedata_w;
 
 reg [1:0] color_r, color_w;
-reg [1:0] point_r, point_w;
+reg [3:0] point_r, point_w;
 reg [9:0] h_r, h_w;
 reg [9:0] v_r, v_w;
-reg [4:0] box_r, box_w;
-reg [7:0] test_cnt_r, test_cnt_w;
+reg [3:0] box_r, box_w;
 reg [7:0] readdata_r, readdata_w;
 reg readdata_valid_r, readdata_valid_w;
-
-wire [7:0] hv;
-
-assign hv = v_r[7:0];
 
 assign avm_address = avm_address_r;
 assign avm_read = avm_read_r;
 assign avm_write = avm_write_r;
 assign avm_writedata = writedata_r;
 assign o_ready = (state_r == SEND_IMAGE && avm_readdata[TX_OK_BIT] && cnt_r == 0 && ~avm_waitrequest);
-assign o_state = state_r;
 assign o_readdata = readdata_r;
 assign o_readdata_valid = readdata_valid_r;
 
-assign o_test = readdata_r;
+// assign o_state = state_r;
+// assign o_test = {box_r, point_r};
 // assign o_test = 20;
 
 task StartRead;
@@ -78,12 +73,7 @@ task StartWrite;
 endtask
 
 always @(*) begin
-    test_cnt_w = (readdata_valid_r) ? test_cnt_r + 1 : test_cnt_r;
-end
-
-always @(*) begin
     readdata_valid_w = (state_r == GET_PREDICT && ~avm_waitrequest && cnt_r == 1) ? 1 : 0;
-    // readdata_valid_w = (state_r == SEND_IMAGE && ~avm_waitrequest && cnt_r == 1) ? 1 : 0;
 end
 
 always @(*) begin
@@ -114,7 +104,7 @@ always @(*) begin
             if (~avm_waitrequest) begin
                 cnt_w = ((cnt_r == 0 && avm_readdata[RX_OK_BIT]) || cnt_r == 1) ? ~cnt_r : cnt_r;
                 point_w = (cnt_r == 1) ? (point_r == 7) ? 0 : point_r + 1 : point_r;
-                box_w = (cnt_r == 1 && point_r == 7) ? (box_r == 15) ? 0 : box_r + 1 : box_r;
+                box_w = (cnt_r == 1 && point_r == 7) ? (box_r == 14) ? 0 : box_r + 1 : box_r;
                 color_w = color_r;
                 h_w = h_r;
                 v_w = v_r;            
@@ -185,7 +175,8 @@ always@ (*) begin
     case (state_r)
         IDLE: state_w = (i_start_send) ? SEND_IMAGE : IDLE;
         SEND_IMAGE: state_w = (~avm_waitrequest && cnt_r == 1 && color_r == 2 && h_r == 639 && v_r == 479) ? GET_PREDICT : SEND_IMAGE;
-        GET_PREDICT: state_w = (~avm_waitrequest && box_r == 14 && point_r == 7 && cnt_r == 1) ? IDLE : GET_PREDICT;
+        // GET_PREDICT: state_w = (~avm_waitrequest && box_r == 14 && point_r == 7 && cnt_r == 1) ? IDLE : GET_PREDICT;
+        GET_PREDICT: state_w = (i_start_send) ? SEND_IMAGE : GET_PREDICT;
         default: state_w = IDLE;
     endcase
 end
@@ -203,7 +194,6 @@ always @(posedge avm_clk or posedge avm_rst) begin
         box_r <= 0;
         point_r <= 0;
         writedata_r <= 0;
-        test_cnt_r <= 0;
         readdata_r <= 0;
         readdata_valid_r <= 0;
     end 
@@ -219,7 +209,6 @@ always @(posedge avm_clk or posedge avm_rst) begin
         box_r <= box_w;
         point_r <= point_w;
         writedata_r <= writedata_w;
-        test_cnt_r <= test_cnt_w;
         readdata_r <= readdata_w;
         readdata_valid_r <= readdata_valid_w;
     end
